@@ -1,12 +1,14 @@
 
 function AdevarOptions() {
 	// Adevar options
-
-	this.addChristmasIfOk();
-
 	if (!localStorage.getItem(AdevarOptions.tileDesignTypeKey)
 		|| !AdevarOptions.tileDesignTypeValues[localStorage.getItem(AdevarOptions.tileDesignTypeKey)]) {
 		AdevarOptions.setTileDesignsPreference("classic", true);
+	}
+
+	AdevarOptions.viewAsGuest = false;
+	if (currentGameData && currentGameData.gameTypeId === GameType.Adevar.id && usernameEquals(currentGameData.guestUsername)) {
+		AdevarOptions.viewAsGuest = true;
 	}
 }
 
@@ -18,6 +20,7 @@ AdevarOptions.tileDesignTypeValues = {
 	monochrome: "Adevar Monochrome",
 	// spoopy: "Adevar Spoopy",
 	icy: "Adevar Icy",
+	irl: "Adevar TGG Red Oak & Walnut",
 	chuji: "Chuji"
 };
 
@@ -37,31 +40,19 @@ AdevarOptions.buildTileDesignDropdownDiv = function(alternateLabelText) {
 							});
 };
 
+AdevarOptions.buildToggleViewAsGuestDiv = function() {
+	var div = document.createElement("div");
+	var message = "Viewing board as Host";
+	var linkText = "View as Guest";
+	if (AdevarOptions.viewAsGuest) {
+		message = "Viewing board as Guest";
+		linkText = "View as Host";
+	}
+	div.innerHTML = message + ": <span class='skipBonus' onclick='gameController.toggleViewAsGuest();'>" + linkText + "</span>";
+	return div;
+};
+
 AdevarOptions.commenceSpoopy = function() {
 	AdevarOptions.tileDesignTypeValues['spoopy'] = "Adevar Spoopy";
 	AdevarOptions.setTileDesignsPreference('spoopy');
-};
-
-AdevarOptions.includeChristmas = function() {
-	AdevarOptions.tileDesignTypeValues['christmas'] = "Adevar Christmas";
-	AdevarOptions.tileDesignTypeValues['chu-ji-holiday'] = "Chuji Holiday";
-};
-
-AdevarOptions.prototype.addChristmasIfOk = function() {
-	var currentDate = new Date();
-
-	var targetDate = new Date();
-	targetDate.setFullYear(2020);
-	targetDate.setMonth(11);
-	targetDate.setDate(3);
-
-	debug(targetDate.getMonth());
-	debug(targetDate.getDate());
-	debug(targetDate.getFullYear());
-
-	if (currentDate.getFullYear() >= targetDate.getFullYear()
-			&& currentDate.getMonth() >= targetDate.getMonth()
-			&& currentDate.getDate() >= targetDate.getDate()) {
-		AdevarOptions.includeChristmas();
-	}
 };

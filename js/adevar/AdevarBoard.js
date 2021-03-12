@@ -880,7 +880,14 @@ AdevarBoard.prototype.pointIsAdjacentToVanguard = function(boardPoint) {
 
 AdevarBoard.prototype.targetPointHasTileThatCanBeCaptured = function(tile, movementInfo, fromPoint, targetPoint, isDeploy) {
 	/* If Deploying a SF or Reflection tile... */
-	if (isDeploy && [AdevarTileType.secondFace, AdevarTileType.reflection].includes(tile.type)) {
+	if (isDeploy && AdevarTileType.reflection === tile.type) {
+		return targetPoint.hasTile()
+			&& (
+				(targetPoint.tile.ownerName !== tile.ownerName
+					&& targetPoint.tile.type === AdevarTileType.basic)
+				|| this.tileCanCapture(tile, movementInfo, fromPoint, targetPoint)
+			)
+	} else if (isDeploy && AdevarTileType.secondFace === tile.type) {
 		return targetPoint.hasTile()
 			&& targetPoint.tile.ownerName !== tile.ownerName
 			&& targetPoint.tile.type === AdevarTileType.basic;
@@ -1099,7 +1106,31 @@ AdevarBoard.prototype.playerHasMoreBasicTilesInEachNonOwnedPlot = function(playe
 		&& this.basicTilePlotCounts[AdevarBoardPointType.WEST_WHITE_PLOT][player] > this.basicTilePlotCounts[AdevarBoardPointType.WEST_WHITE_PLOT][opponent]
 		&& this.basicTilePlotCounts[AdevarBoardPointType.EAST_NEUTRAL_PLOT][player] > this.basicTilePlotCounts[AdevarBoardPointType.EAST_NEUTRAL_PLOT][opponent]
 		&& this.basicTilePlotCounts[AdevarBoardPointType.WEST_NEUTRAL_PLOT][player] > this.basicTilePlotCounts[AdevarBoardPointType.WEST_NEUTRAL_PLOT][opponent];
-}
+};
+
+AdevarBoard.prototype.playerHasEqualOrMoreBasicTilesInEachNonOwnedPlot = function(player) {
+	var opponent = getOpponentName(player);
+	return this.basicTilePlotCounts[AdevarBoardPointType.NORTH_RED_PLOT][player] >= this.basicTilePlotCounts[AdevarBoardPointType.NORTH_RED_PLOT][opponent]
+		&& this.basicTilePlotCounts[AdevarBoardPointType.SOUTH_RED_PLOT][player] >= this.basicTilePlotCounts[AdevarBoardPointType.SOUTH_RED_PLOT][opponent]
+		&& this.basicTilePlotCounts[AdevarBoardPointType.EAST_WHITE_PLOT][player] >= this.basicTilePlotCounts[AdevarBoardPointType.EAST_WHITE_PLOT][opponent]
+		&& this.basicTilePlotCounts[AdevarBoardPointType.WEST_WHITE_PLOT][player] >= this.basicTilePlotCounts[AdevarBoardPointType.WEST_WHITE_PLOT][opponent]
+		&& this.basicTilePlotCounts[AdevarBoardPointType.EAST_NEUTRAL_PLOT][player] >= this.basicTilePlotCounts[AdevarBoardPointType.EAST_NEUTRAL_PLOT][opponent]
+		&& this.basicTilePlotCounts[AdevarBoardPointType.WEST_NEUTRAL_PLOT][player] >= this.basicTilePlotCounts[AdevarBoardPointType.WEST_NEUTRAL_PLOT][opponent]
+		&& this.basicTilePlotCounts[AdevarBoardPointType.NORTH_RED_PLOT][player] >= .5
+		&& this.basicTilePlotCounts[AdevarBoardPointType.SOUTH_RED_PLOT][player] >= .5
+		&& this.basicTilePlotCounts[AdevarBoardPointType.EAST_WHITE_PLOT][player] >= .5
+		&& this.basicTilePlotCounts[AdevarBoardPointType.WEST_WHITE_PLOT][player] >= .5
+		&& this.basicTilePlotCounts[AdevarBoardPointType.EAST_NEUTRAL_PLOT][player] >= .5
+		&& this.basicTilePlotCounts[AdevarBoardPointType.WEST_NEUTRAL_PLOT][player] >= .5;
+};
+
+/*AdevarBoard.prototype.playerHasMoreBasicTilesInEachNonOwnedNonRedPlot = function(player) {
+	var opponent = getOpponentName(player);
+	return this.basicTilePlotCounts[AdevarBoardPointType.EAST_WHITE_PLOT][player] > this.basicTilePlotCounts[AdevarBoardPointType.EAST_WHITE_PLOT][opponent]
+		&& this.basicTilePlotCounts[AdevarBoardPointType.WEST_WHITE_PLOT][player] > this.basicTilePlotCounts[AdevarBoardPointType.WEST_WHITE_PLOT][opponent]
+		&& this.basicTilePlotCounts[AdevarBoardPointType.EAST_NEUTRAL_PLOT][player] > this.basicTilePlotCounts[AdevarBoardPointType.EAST_NEUTRAL_PLOT][opponent]
+		&& this.basicTilePlotCounts[AdevarBoardPointType.WEST_NEUTRAL_PLOT][player] > this.basicTilePlotCounts[AdevarBoardPointType.WEST_NEUTRAL_PLOT][opponent];
+};*/
 
 AdevarBoard.prototype.playerHasTileOfTypeAtPoint = function(player, notationPoint, tileType) {
 	var point = notationPoint.rowAndColumn;
@@ -1131,6 +1162,18 @@ AdevarBoard.prototype.markOrientalLilyObjectivePoints = function() {
 
 		gardenNumber++;
 	});
+};
+
+AdevarBoard.prototype.getPlayerSFTileThatIsNotThisOne = function(sfTile) {
+	var otherSfTile = null;
+	this.forEachBoardPointWithTile(function(boardPointWithTile) {
+		if (boardPointWithTile.tile.type === AdevarTileType.secondFace
+				&& boardPointWithTile.tile.ownerName === sfTile.ownerName
+				&& boardPointWithTile.tile !== sfTile) {
+			otherSfTile = boardPointWithTile.removeTile();
+		}
+	});
+	return otherSfTile;
 };
 
 AdevarBoard.prototype.getCopy = function() {

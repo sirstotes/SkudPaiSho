@@ -1,7 +1,10 @@
 /* Adevar specific UI interaction logic */
 
 function AdevarController(gameContainer, isMobile) {
-	this.actuator = new AdevarActuator(gameContainer, isMobile, isAnimationsOn());
+	new AdevarOptions(); // Just to initialize
+	this.gameContainer = gameContainer;
+	this.isMobile = isMobile;
+	this.createActuator();
 
 	this.resetGameManager();
 	this.resetNotationBuilder();
@@ -13,9 +16,14 @@ function AdevarController(gameContainer, isMobile) {
 	showReplayControls();
 
 	this.isPaiShoGame = true;
-
-	new AdevarOptions(); // Just to initialize
 }
+
+AdevarController.prototype.createActuator = function() {
+	this.actuator = new AdevarActuator(this.gameContainer, this.isMobile, isAnimationsOn());
+	if (this.theGame) {
+		this.theGame.updateActuator(this.actuator);
+	}
+};
 
 AdevarController.prototype.getGameTypeId = function() {
 	return GameType.Adevar.id;
@@ -72,9 +80,15 @@ AdevarController.prototype.getDefaultHelpMessageText = function() {
 	}
 
 	var message = "<h4>Adevăr Pai Sho</h4> <p>Adevăr Pai Sho is a game of strategy, deception, and wit as players sneakily accomplish their hidden objective and take down their opponent's Hidden Tile. Be careful when achieving your objective, because trying to win could be the very thing that makes you lose! ";
-	message += "See the <a href='https://tinyurl.com/adevarrulebook' target='_blank'>Adevăr rules</a> for the full rules and more about the game.</p>";
+	message += "See the <a href='https://tinyurl.com/adevarrulebook' target='_blank'>Adevăr rules</a> and <a href='https://tinyurl.com/AdevarQuickGuideDoc' target='_blank'>Adevăr Quick Guide</a> for the full rules and more about the game.</p>";
 	message += "<p>Before the game, players each choose a Hidden Tile. The game is won when a player completes the objective given to them by their chosen Hidden Tile or captures their opponent’s Hidden Tile with their corresponding Second Face tile.</p>";
 	message += "<p>On a turn, players either move a tile on the board or call a new tile onto the board.</p>";
+	if (this.hoveredOverLily) {
+		message += "<p><img src='images/Adevar/" + localStorage.getItem(AdevarOptions.tileDesignTypeKey) + "/HOrientalLily.png' height=28px width=28px /> See the Oriental Lily garden objectives individually:"
+				+ "<br />Garden A: <span class='skipBonus' onclick='gameController.hideOrientalLilyHelp(); gameController.showOrientalLilyHelp(HOST, 0);'>HOST</span> <span class='skipBonus' onclick='gameController.hideOrientalLilyHelp(); gameController.showOrientalLilyHelp(GUEST, 0);'>GUEST</span>"
+				+ "<br />Garden B: <span class='skipBonus' onclick='gameController.hideOrientalLilyHelp(); gameController.showOrientalLilyHelp(HOST, 1);'>HOST</span> <span class='skipBonus' onclick='gameController.hideOrientalLilyHelp(); gameController.showOrientalLilyHelp(GUEST, 1);'>GUEST</span>"
+				+ "<br />Garden C: <span class='skipBonus' onclick='gameController.hideOrientalLilyHelp(); gameController.showOrientalLilyHelp(HOST, 2);'>HOST</span> <span class='skipBonus' onclick='gameController.hideOrientalLilyHelp(); gameController.showOrientalLilyHelp(GUEST, 2);'>GUEST</span></p>";
+	}
 	return message;
 };
 
@@ -92,8 +106,19 @@ AdevarController.prototype.getAdditionalMessage = function() {
 			msg += "<br /><strong>Adevăr Lite</strong> is a <em>training wheels</em> mode for beginners to learn the game - players play with their Hidden Tiles revealed and win by accomplishing their chosen Hidden Tile objective.<br />";
 		}
 
+	//	if (gameOptionEnabled(BLACK_ORCHID_BUFF)) {
+	//		msg += "The Black Orchid is currently the least picked HT, and frankly could use some improvement. This changes the objective to require a greater than <em> or equal</em> number of tiles in each plot.";
+	//	}
+
 		msg += getGameOptionsMessageHtml(GameType.Adevar.gameOptions);
 	}
+
+	/* if (this.hoveredOverLily) {
+		msg += "<br />See the Oriental Lily garden objectives individually:"
+			+ "<br />Garden A: <span class='skipBonus' onclick='gameController.hideOrientalLilyHelp(); gameController.showOrientalLilyHelp(HOST, 0);'>HOST</span> <span class='skipBonus' onclick='gameController.hideOrientalLilyHelp(); gameController.showOrientalLilyHelp(GUEST, 0);'>GUEST</span>"
+			+ "<br />Garden B: <span class='skipBonus' onclick='gameController.hideOrientalLilyHelp(); gameController.showOrientalLilyHelp(HOST, 1);'>HOST</span> <span class='skipBonus' onclick='gameController.hideOrientalLilyHelp(); gameController.showOrientalLilyHelp(GUEST, 1);'>GUEST</span>"
+			+ "<br />Garden C: <span class='skipBonus' onclick='gameController.hideOrientalLilyHelp(); gameController.showOrientalLilyHelp(HOST, 2);'>HOST</span> <span class='skipBonus' onclick='gameController.hideOrientalLilyHelp(); gameController.showOrientalLilyHelp(GUEST, 2);'>GUEST</span>";
+	} */
 
 	return msg;
 };
@@ -107,8 +132,20 @@ AdevarController.prototype.getAdditionalHelpTabDiv = function() {
 	settingsDiv.appendChild(heading);
 	settingsDiv.appendChild(AdevarOptions.buildTileDesignDropdownDiv("Tile Designs"));
 
+	if (!playingOnlineGame() || !iAmPlayerInCurrentOnlineGame() || getOnlineGameOpponentUsername() === getUsername()) {
+		settingsDiv.appendChild(document.createElement("br"));
+		settingsDiv.appendChild(AdevarOptions.buildToggleViewAsGuestDiv());
+	}
+
 	settingsDiv.appendChild(document.createElement("br"));
 	return settingsDiv;
+};
+
+AdevarController.prototype.toggleViewAsGuest = function() {
+	AdevarOptions.viewAsGuest = !AdevarOptions.viewAsGuest;
+	this.createActuator();
+	this.callActuate();
+	clearMessage();
 };
 
 AdevarController.prototype.unplayedTileClicked = function(tileDiv) {
@@ -363,9 +400,9 @@ AdevarController.prototype.buildOtherTileMessages = function(tile) {
 	return messages;
 };
 
-AdevarController.prototype.showOrientalLilyHelp = function() {
+AdevarController.prototype.showOrientalLilyHelp = function(player, gardenIndex) {
 	if (!this.lilyHelpOn) {
-		this.theGame.actuator.showOrientalLilyHighlights();
+		this.theGame.actuator.showOrientalLilyHighlights(player, gardenIndex);
 		this.lilyHelpOn = true;
 	}
 };
@@ -385,14 +422,20 @@ AdevarController.prototype.buildHiddenTileObjectiveMessage = function(hiddenTile
 			objective = "Have 2 Basic tiles in each Red Plot, and 3 Basic tiles in each White Plot";
 			break;
 		case AdevarTileCode.orientalLily:
-			objective = "Create one of the three Oriental Lily Garden formations with Basic tiles on your side of the board (see rules, image below, or board highlights for Garden diagrams)<br /><img alt='Adevar Oriental Lily Gardens Diagram' style='width:100%' src='images/Adevar/OrientalLilyDiagram.png' />";
+			objective = "Create one of the three Oriental Lily Garden formations with Basic tiles on your side of the board (see rules, or board highlights for Garden diagrams).";
+			objective += "<br />See the Oriental Lily garden objectives individually:"
+				+ "<br />Garden A: <span class='skipBonus' onclick='gameController.hideOrientalLilyHelp(); gameController.showOrientalLilyHelp(HOST, 0);'>HOST</span> <span class='skipBonus' onclick='gameController.hideOrientalLilyHelp(); gameController.showOrientalLilyHelp(GUEST, 0);'>GUEST</span>"
+				+ "<br />Garden B: <span class='skipBonus' onclick='gameController.hideOrientalLilyHelp(); gameController.showOrientalLilyHelp(HOST, 1);'>HOST</span> <span class='skipBonus' onclick='gameController.hideOrientalLilyHelp(); gameController.showOrientalLilyHelp(GUEST, 1);'>GUEST</span>"
+				+ "<br />Garden C: <span class='skipBonus' onclick='gameController.hideOrientalLilyHelp(); gameController.showOrientalLilyHelp(HOST, 2);'>HOST</span> <span class='skipBonus' onclick='gameController.hideOrientalLilyHelp(); gameController.showOrientalLilyHelp(GUEST, 2);'>GUEST</span>";
 			this.showLilyHelp = true;
+			this.hoveredOverLily = true;
+			refreshMessage();
 			break;
 		case AdevarTileCode.echeveria:
 			objective = "Capture at least 2 of each of your opponent’s Basic tile types, and have at least 1 of each of your Basic tile types be captured";
 			break;
 		case AdevarTileCode.whiteRose:
-			objective = "Call a Gate completely in your opponent's starting Neutral Plot";
+			objective = "Call a Gate completely in your opponent's starting Open Plot";
 			break;
 		case AdevarTileCode.whiteLotus:
 			objective = "Form a \"Harmony Ring\" similar to Skud Pai Sho using Basic tiles (Lilac - Zinnia - Foxglove order for Harmony Circle)";
@@ -401,12 +444,21 @@ AdevarController.prototype.buildHiddenTileObjectiveMessage = function(hiddenTile
 			objective = "Have at least one total Basic tile in each of the 8 Plots on the board";
 			break;
 		case AdevarTileCode.blackOrchid:
-			objective = "Have more Basic tiles in each plot, except for the starting North and South Neutral Plots, than your opponent";
+		//	if (gameOptionEnabled(BLACK_ORCHID_BUFF)) {
+				objective = "Have as many or more Basic tiles in each plot, except for the starting North and South Open Plots, than your opponent. You must have at least 1/2 a tile in those Plots.";
+		//	} else {
+		//		objective = "Have more Basic tiles in each plot, except for the starting North and South Open Plots, than your opponent";
+		//	}
 			break;
 		default:
 			objective = "Unknown";
 			break;
 	}
+
+	/* if (!this.showLilyHelp && this.hoveredOverLily) {
+		this.hoveredOverLily = false;
+		refreshMessage();
+	} */
 
 	return hiddenTile.getName() + "'s Objective: " + objective;
 };
@@ -442,7 +494,7 @@ AdevarController.prototype.getPointMessage = function(htmlPoint) {
 		} else if ([AdevarBoardPointType.EAST_WHITE_PLOT, AdevarBoardPointType.WEST_WHITE_PLOT].includes(plotType)) {
 			message.push("A player may have up to three Basic tiles in each White plot at a time");
 		} else {
-			message.push("Neutral plots have no Basic tile limit");
+			message.push("Open plots have no Basic tile limit");
 		}
 	});
 
@@ -500,6 +552,11 @@ AdevarController.prototype.isSolitaire = function() {
 
 AdevarController.prototype.setGameNotation = function(newGameNotation) {
 	this.gameNotation.setNotationText(newGameNotation);
+	if (playingOnlineGame() && iAmPlayerInCurrentOnlineGame() && getOnlineGameOpponentUsername() != getUsername()) {
+		new AdevarOptions();	// To set perspective...
+		this.createActuator();
+		clearMessage();
+	}
 };
 
 AdevarController.prototype.getSandboxNotationMove = function(moveIndex) {
