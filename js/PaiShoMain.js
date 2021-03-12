@@ -4329,6 +4329,56 @@ function show2020GameStats(showWins) {
 		}
 	);
 }
+function getColorForGame(name) {
+    if (name.includes("Skud")) {
+        return("#c83737");
+    } else if (name.includes("Vagabond")) {
+        return("#88bd38");
+    } else if (name.includes("Adevăr")) {
+        return("#6d60b5");
+    } else if (name.includes("Capture")) {
+        return("#6cb562");
+    } else if (name.includes("Solitaire")) {
+        return("#50ac8c");
+    } else if (name.includes("Street")) {
+        return("#464444");
+    } else if (name.includes("Overgrowth")) {
+        return("#b4bb31");
+    } else if (name.includes("Fire")) {
+        return("#d47831");
+    } else if (name.includes("Playground")) {
+        return("#e0b92a");
+    } else if (name.includes("Tumbleweed")) {
+		return("#da992e");
+	} else {
+        return("#f1f1f1");
+    }
+}
+function getSecondaryColorForGame(name) {
+    if (name.includes("Skud")) {
+        return("#982929");
+    } else if (name.includes("Vagabond")) {
+        return("#6d9f22");
+    } else if (name.includes("Adevăr")) {
+        return("#4d4095");
+    } else if (name.includes("Capture")) {
+        return("#418837");
+    } else if (name.includes("Solitaire")) {
+        return("#369272");
+    } else if (name.includes("Street")) {
+        return("#343131");
+    } else if (name.includes("Overgrowth")) {
+        return("#9da41b");
+    } else if (name.includes("Fire")) {
+        return("#ab5819");
+    } else if (name.includes("Playground")) {
+        return("#b69313");
+    } else if (name.includes("Tumbleweed")) {
+		return("#B97D1C");
+	} else {
+        return("#f1f1f1");
+    }
+}
 
 function showGameStats(showWins) {
 	onlinePlayEngine.getCompletedGameStats(
@@ -4349,16 +4399,35 @@ function showGameStats(showWins) {
 					var message = getUsername() + "'s total completed games against other players:<br />";
 
 					var stats = resultData.stats;
+					var conicGradientValues = "";
+					var offset = 0;
+					var totalGamesCompleted = 0;
+
+					for (var i = 0; i < stats.length; i++) {
+						totalGamesCompleted += stats[i].totalGamesCompleted;
+					}
 
 					for (var i = 0; i < stats.length; i++) {
 						var totalWins = stats[i].totalWins ? stats[i].totalWins : 0;
 						var winPercent = Math.round(totalWins / stats[i].totalGamesCompleted * 100);
+						var angleOfSection = Math.round(360*(stats[i].totalGamesCompleted/totalGamesCompleted));
 						if (showWins) {
-							message += "<br />" + stats[i].gameType + ": " + stats[i].totalGamesCompleted + " (" + totalWins + " wins, " + winPercent + "%)";
+							message += "<br /> <span style='color:" + getColorForGame(gameMode) + ";'>" + stats[i].gameType + "</span> : " + stats[i].totalGamesCompleted + " (" + totalWins + " wins, " + winPercent + "%)";
+
+							var angleOfWinSection = angleOfSection * (stats[i].totalWins / stats[i].totalGamesCompleted);
+							var angleOfLossSection = angleOfSection - angleOfWinSection;
+							conicGradientValues += getColorForGame(stats[i].gameType) + " " + ((offset > 0 && i < stats.length-1)?(offset + "deg "):" ") + (offset + angleOfLosSection) + "deg,";
+							offset += angleOfLossSection;
+							conicGradientValues += getSecondaryColorForGame(stats[i].gameType) + " " + ((offset > 0 && i < stats.length-1)?(offset+"deg "):" ") + (offset + angleOfWinSection) + "deg" + ((i < values.length-1)?",":"");
+							offset += angleOfWinSection;
 						} else {
-							message += "<br />" + stats[i].gameType + ": " + stats[i].totalGamesCompleted;
+							message += "<br /> <span style='color:" + getColorForGame(gameMode) + ";'>" + stats[i].gameType + "</span> : " + stats[i].totalGamesCompleted;
+							conicGradientValues += getColorForGame(stats[i].gameType) + " " + ((offset > 0 && i < stats.length-1)?(offset+"deg "):" ") + (offset + angleOfSection) + "deg" + ((i < values.length-1)?",":"");
+							offset += angleOfSection;
 						}
 					}
+
+					message += "<div class='pieChart' style='background:conic-gradient(" + conicGradientValues + ");'></div>"
 
 					if (!showWins) {
 						message += "<br /><br /><span class='skipBonus' onclick='showGameStats(true);'>Show number of wins for each game</span>";
