@@ -1578,16 +1578,9 @@ FirePaiShoBoard.prototype.getTileHarmonies = function(boardPoint) {
 FirePaiShoBoard.prototype.getHarmonyLeft = function(tile, endRowCol, surroundingLionTurtleTiles) {
 	var colToCheck = endRowCol.col - 1;
 
-	if (gameOptionEnabled(ETHEREAL_ACCENT_TILES)) {
-		while (colToCheck >= 0 && !this.cells[endRowCol.row][colToCheck].hasFlowerTile() 
+	while (colToCheck >= 0 && !this.cells[endRowCol.row][colToCheck].hasTile() 
 		&& !this.cells[endRowCol.row][colToCheck].isType(GATE)) {
 		colToCheck--;
-		}
-	}else {
-		while (colToCheck >= 0 && !this.cells[endRowCol.row][colToCheck].hasTile() 
-			&& !this.cells[endRowCol.row][colToCheck].isType(GATE)) {
-			colToCheck--;
-		}
 	}
 
 	if (colToCheck >= 0) {
@@ -1609,18 +1602,10 @@ FirePaiShoBoard.prototype.getHarmonyLeft = function(tile, endRowCol, surrounding
 FirePaiShoBoard.prototype.getHarmonyRight = function(tile, endRowCol, surroundingLionTurtleTiles) {
 	var colToCheck = endRowCol.col + 1;
 
-	if (gameOptionEnabled(ETHEREAL_ACCENT_TILES)) {
-		while (colToCheck <= 16 && !this.cells[endRowCol.row][colToCheck].hasFlowerTile() 
-			&& !this.cells[endRowCol.row][colToCheck].isType(GATE)) {
-			colToCheck++;
-		}
-	}else {
-		while (colToCheck <= 16 && !this.cells[endRowCol.row][colToCheck].hasTile() 
-			&& !this.cells[endRowCol.row][colToCheck].isType(GATE)) {
-			colToCheck++;
-		}
+	while (colToCheck <= 16 && !this.cells[endRowCol.row][colToCheck].hasTile() 
+		&& !this.cells[endRowCol.row][colToCheck].isType(GATE)) {
+		colToCheck++;
 	}
-
 
 	if (colToCheck <= 16) {
 		var checkPoint = this.cells[endRowCol.row][colToCheck];
@@ -1641,19 +1626,10 @@ FirePaiShoBoard.prototype.getHarmonyRight = function(tile, endRowCol, surroundin
 FirePaiShoBoard.prototype.getHarmonyUp = function(tile, endRowCol, surroundingLionTurtleTiles) {
 	var rowToCheck = endRowCol.row - 1;
 
-	if (gameOptionEnabled(ETHEREAL_ACCENT_TILES)) {
-		while (rowToCheck >= 0 && !this.cells[rowToCheck][endRowCol.col].hasFlowerTile() 
-			&& !this.cells[rowToCheck][endRowCol.col].isType(GATE)) {
-			rowToCheck--;
-		}
-	}else {
-		while (rowToCheck >= 0 && !this.cells[rowToCheck][endRowCol.col].hasTile() 
-			&& !this.cells[rowToCheck][endRowCol.col].isType(GATE)) {
-			rowToCheck--;
-		}
+	while (rowToCheck >= 0 && !this.cells[rowToCheck][endRowCol.col].hasTile() 
+		&& !this.cells[rowToCheck][endRowCol.col].isType(GATE)) {
+		rowToCheck--;
 	}
-
-
 
 	if (rowToCheck >= 0) {
 		var checkPoint = this.cells[rowToCheck][endRowCol.col];
@@ -1674,16 +1650,9 @@ FirePaiShoBoard.prototype.getHarmonyUp = function(tile, endRowCol, surroundingLi
 FirePaiShoBoard.prototype.getHarmonyDown = function(tile, endRowCol, surroundingLionTurtleTiles) {
 	var rowToCheck = endRowCol.row + 1;
 
-	if (gameOptionEnabled(ETHEREAL_ACCENT_TILES)) {
-		while (rowToCheck <= 16 && !this.cells[rowToCheck][endRowCol.col].hasFlowerTile() 
-			&& !this.cells[rowToCheck][endRowCol.col].isType(GATE)) {
-			rowToCheck++;
-		}
-	}else {
-		while (rowToCheck <= 16 && !this.cells[rowToCheck][endRowCol.col].hasTile() 
-			&& !this.cells[rowToCheck][endRowCol.col].isType(GATE)) {
-			rowToCheck++;
-		}
+	while (rowToCheck <= 16 && !this.cells[rowToCheck][endRowCol.col].hasTile() 
+		&& !this.cells[rowToCheck][endRowCol.col].isType(GATE)) {
+		rowToCheck++;
 	}
 
 	if (rowToCheck <= 16) {
@@ -1940,10 +1909,6 @@ FirePaiShoBoard.prototype.revealFirstMovePlacement = function() {
 
 			if (boardPoint.types.includes(CENTER)) {
 				boardPoint.addType(POSSIBLE_MOVE);
-			} else if (gameOptionEnabled(MIDLINE_OPENER)){
-				if (boardPoint.types.includes(RED) && boardPoint.types.includes(WHITE)) {
-					boardPoint.addType(POSSIBLE_MOVE);
-				}
 			}
 			
 		});

@@ -599,12 +599,6 @@ figure > div {
   opacity: 0.75;
 }
 
-.boosted
-{
-  box-shadow: 0px 0px 6px 3px #fff;
-  filter: saturate(175%);
-}
-
 .possibleMove {
   box-shadow: 0px 0px 24px 2px #421;
 }
@@ -628,18 +622,6 @@ figure > div {
 }
 .HOSTharmony.GUESTharmony {
   box-shadow: 0px 0px 8px 4px #77A2E6;
-}
-
-.tileBetweenHarmonyHOST {
-  box-shadow: 0px 0px 2px 1px #6CC ;
-}
-
-.tileBetweenHarmonyGUEST {
-  box-shadow: 0px 0px 2px 1px #87f;
-}
-
-.tileBetweenHarmonyHOST.tileBetweenHarmonyGUEST{
-  box-shadow: 0px 0px 2px 1px #77A2E6;
 }
 
 
@@ -1732,4 +1714,11 @@ textarea {
       background-color: #77A2E6;
     }
 
+}
+
+.pieChart {
+  position: relative;
+  width: 300px;
+  min-height: 300px;
+  border-radius: 50%;
 }

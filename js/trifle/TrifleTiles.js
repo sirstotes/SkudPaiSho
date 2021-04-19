@@ -39,7 +39,7 @@ Trifle.TileCodes = {
 	BoarQPine: 'BoarQPine',
 	CherryBlossom: "CherryBlossom",
 	Sunflower: "Sunflower",
-	MoonFlower: "MoonFlower",
+	MoonFlower: "Moon Flower",
 	Chamomile: "Chamomile",
 	/* Fire */
 	FireBanner: "FireBanner",
@@ -140,7 +140,7 @@ Trifle.SpawnLocation = {
 	adjacent: "adjacent"
 };
 
-Trifle.AbilityName = {
+Trifle.Ability = {
 	captureTiles: "captureTiles",
 	removeEffects: "removeEffects",
 	protectFromCapture: "protectFromCapture",
@@ -303,7 +303,7 @@ Trifle.TileInfo.defineAbilitiesForAbilityTypes = function () {
 
 	AbilitiesForType[Trifle.AbilityType.protection] = [
 		Trifle.ZoneAbility.protectFriendlyTilesFromCapture,
-		Trifle.AbilityName.protectFromCapture
+		Trifle.Ability.protectFromCapture
 	];
 };
 
@@ -314,7 +314,7 @@ Trifle.TileInfo.defineAbilityTypes = function () {
 		Trifle.AbilityType.protection
 	];
 
-	AbilityTypes[Trifle.AbilityName.protectFromCapture] = [
+	AbilityTypes[Trifle.Ability.protectFromCapture] = [
 		Trifle.AbilityType.protection
 	];
 };
@@ -396,7 +396,7 @@ Trifle.TileInfo.defineTrifleTiles = function() {
 		abilities: [
 			{
 				// TODO - Test/implement
-				type: Trifle.AbilityName.cancelZone,
+				type: Trifle.Ability.cancelZone,
 				triggeringBoardStates: [Trifle.AbilityTrigger.whileInsideTemple],
 				targetTileTypes: [Trifle.TileCategory.thisTile]
 			}
@@ -587,7 +587,7 @@ Trifle.TileInfo.defineTrifleTiles = function() {
 				targetTeams: [Trifle.TileTeam.enemy]
 			}, */
 			{
-				type: Trifle.AbilityName.drawTilesAlongLineOfSight,
+				type: Trifle.Ability.drawTilesAlongLineOfSight,
 				triggeringBoardStates: [Trifle.AbilityTrigger.whileTileInLineOfSight],
 				activationConditions: [Trifle.AbilityTrigger.whileOutsideTemple],
 				targetTeams: [Trifle.TileTeam.enemy]
@@ -633,8 +633,8 @@ Trifle.TileInfo.defineTrifleTiles = function() {
 			size: 1,
 			abilities: [
 				{
-					type: Trifle.AbilityName.grantBonusMovement,
-					triggeringActions: [Trifle.AbilityTrigger.whenTileMovesFromWithinZone],
+					type: Trifle.Ability.grantBonusMovement,
+					triggeringAction: Trifle.AbilityTrigger.whenTileMovesFromWithinZone,
 					// ...
 				}
 			]
@@ -678,7 +678,7 @@ Trifle.TileInfo.defineTrifleTiles = function() {
 		],
 		abilities: [
 			{
-				type: Trifle.AbilityName.removeEffects,
+				type: Trifle.Ability.removeEffects,
 				triggeringBoardStates: [Trifle.AbilityTrigger.whileTileInLineOfSight],
 				targetEffectTypes: [Trifle.AbilityType.protection],
 				targetTileTypes: [Trifle.TileCategory.allTileTypes]
@@ -698,9 +698,9 @@ Trifle.TileInfo.defineTrifleTiles = function() {
 		],
 		abilities: [
 			{
-				type: Trifle.AbilityName.protectFromCapture,
+				type: Trifle.Ability.protectFromCapture,
 				targetTileTypes: [Trifle.TileCategory.thisTile],
-				triggeringActions: [Trifle.AbilityTrigger.whenCapturing],
+				triggeringAction: Trifle.AbilityTrigger.whenCapturing,
 				// triggerTargetTileType: [Trifle.TileType.flower],	// Idea: For example - ability could trigger when capturing a Flower - It'd be better to create a Trigger object that contains all the trigger info
 				duration: 1,
 				tileTypesProtectedFrom: [Trifle.TileCategory.allTileTypes]
@@ -855,8 +855,8 @@ Trifle.TileInfo.defineTrifleTiles = function() {
 			size: 1,
 			abilities: [
 				{
-					type: Trifle.AbilityName.captureTiles,
-					triggeringActions: [Trifle.AbilityTrigger.whenTileLandsInZone],
+					type: Trifle.Ability.captureTiles,
+					triggeringAction: Trifle.AbilityTrigger.whenTileLandsInZone,
 					targetTileTypes: [Trifle.TileCategory.landingTile]
 				}
 			]

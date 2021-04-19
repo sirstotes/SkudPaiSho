@@ -41,10 +41,7 @@ SolitaireController.prototype.getMoveNumber = function() {
 
 SolitaireController.prototype.undoMoveAllowed = function() {
 	return false;
-};
-SolitaireController.prototype.automaticallySubmitMoveRequired = function() {
-	return true;
-};
+}
 
 SolitaireController.prototype.resetNotationBuilder = function() {
 	this.notationBuilder = new SolitaireNotationBuilder();
@@ -136,25 +133,18 @@ SolitaireController.prototype.unplayedTileClicked = function(tileDiv) {
 
 	var tile = this.theGame.tileManager.peekTile(player, tileCode, tileId);
 
-	if (tile) {
-		if (this.notationBuilder.status === BRAND_NEW) {
-			tile.selectedFromPile = true;
-			this.drawnTile.selectedFromPile = true;
+	if (this.notationBuilder.status === BRAND_NEW) {
+		tile.selectedFromPile = true;
+		this.drawnTile.selectedFromPile = true;
 
-			this.notationBuilder.moveType = PLANTING;
-			this.notationBuilder.plantedFlowerType = tileCode;
-			this.notationBuilder.status = WAITING_FOR_ENDPOINT;
+		this.notationBuilder.moveType = PLANTING;
+		this.notationBuilder.plantedFlowerType = tileCode;
+		this.notationBuilder.status = WAITING_FOR_ENDPOINT;
 
-			this.theGame.setAllLegalPointsOpen(getCurrentPlayer(), tile);
-		} else {
-			this.theGame.hidePossibleMovePoints();
-			this.notationBuilder = new SolitaireNotationBuilder();
-		}
+		this.theGame.setAllLegalPointsOpen(getCurrentPlayer(), tile);
 	} else {
-		/* No Tile! Had an incorrect draw... redraw. 
-			Something is wrong that this has to be here... but it handles it.
-		*/
-		this.callActuate();
+		this.theGame.hidePossibleMovePoints();
+		this.notationBuilder = new SolitaireNotationBuilder();
 	}
 }
 

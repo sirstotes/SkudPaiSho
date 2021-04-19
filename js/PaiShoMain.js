@@ -481,10 +481,10 @@ function usernameIsOneOf(theseNames) {
 	onlinePlayPaused = false;
   }
 
-function showOnlinePlayPausedModal() {
-	closeGame();
+  function showOnlinePlayPausedModal() {
+	  closeGame();
 	showModal("Online Play Paused", "Sorry, something was wrong and online play is currently paused. Take a break for some tea!<br /><br />You may attempt to <span class='skipBonus' onclick='resumeOnlinePlay(); closeModal();'>resume online play</span>.", true);
-}
+  }
 
 var initialVerifyLoginCallback = function initialVerifyLoginCallback(response) {
 	if (response === "Results exist") {
@@ -637,7 +637,7 @@ function updateCurrentGameTitle(isOpponentOnline) {
 
 	// Build HOST username
 	var hostUsernameTag = "";
-	if (currentPlayer === HOST && !getGameWinner()) {
+	if (currentPlayer === HOST && !gameController.theGame.getWinner()) {
 		hostUsernameTag = "<span class='currentPlayerUsername'>";
 	} else {
 		hostUsernameTag = "<span>";
@@ -652,7 +652,7 @@ function updateCurrentGameTitle(isOpponentOnline) {
 	hostUsernameTag += "</span>";
 
 	var guestUsernameTag = "";
-	if (currentPlayer === GUEST && !getGameWinner()) {
+	if (currentPlayer === GUEST && !gameController.theGame.getWinner()) {
 		guestUsernameTag = "<span class='currentPlayerUsername'>";
 	} else {
 		guestUsernameTag = "<span>";
@@ -1088,9 +1088,9 @@ function getAdditionalMessage() {
 
 	msg += gameController.getAdditionalMessage();
 
-	if (getGameWinner()) {
+	if (gameController.theGame.getWinner()) {
 		// There is a winner!
-		msg += " <strong>" + getGameWinner() + getGameWinReason() + "</strong>";
+		msg += " <strong>" + gameController.theGame.getWinner() + gameController.theGame.getWinReason() + "</strong>";
 	} else if (gameController.gameHasEndedInDraw && gameController.gameHasEndedInDraw()) {
 		msg += "Game has ended in a draw.";
 	}
@@ -1126,7 +1126,7 @@ function refreshMessage() {
 
 	getGameMessageElement().innerHTML = message;
 
-	if ((playingOnlineGame() && iAmPlayerInCurrentOnlineGame() && !myTurn() && !getGameWinner()) 
+	if ((playingOnlineGame() && iAmPlayerInCurrentOnlineGame() && !myTurn() && !gameController.theGame.getWinner()) 
 			|| gameController.isSolitaire()) {
 		showResetMoveMessage();
 	}
@@ -1175,47 +1175,29 @@ var finalizeMove = function (moveAnimationBeginStep, ignoreNoEmail, okToUpdateWi
   	}
 }
   
-function showSubmitMoveForm(url) {
-	// Move has completed, so need to send to "current player"
-	/* Commenting out - 20181022
-	var toEmail = getCurrentPlayerEmail();
- 
-	var fromEmail = getUserEmail();
- 
-	var bodyMessage = getEmailBody(url);
- 
-	$('#fromEmail').attr("value", fromEmail);
-	$('#toEmail').attr("value", toEmail);
-	$('#message').attr("value", bodyMessage);
-	$('#contactform').removeClass('gone');
-	*/
-}
-
-function getNoUserEmailMessage() {
-	return "<span class='skipBonus' onclick='loginClicked(); finalizeMove();'>Sign in</span> to play games with others online. <br />";
-}
-
-function playingOnlineGame() {
-	return onlinePlayEnabled && gameId > 0;
-}
-
-function getGameWinner() {
-	if (GameClock.playerIsOutOfTime(HOST)) {
-		return GUEST;
-	} else if (GameClock.playerIsOutOfTime(GUEST)) {
-		return HOST;
-	} else {
-		return gameController.theGame.getWinner();
-	}
-}
-
-function getGameWinReason() {
-	if (GameClock.aPlayerIsOutOfTime()) {
-		return " won the game due to opponent running out of time";
-	} else {
-		return gameController.theGame.getWinReason();
-	}
-}
+  function showSubmitMoveForm(url) {
+	  // Move has completed, so need to send to "current player"
+	  /* Commenting out - 20181022
+	  var toEmail = getCurrentPlayerEmail();
+  
+	  var fromEmail = getUserEmail();
+  
+	  var bodyMessage = getEmailBody(url);
+  
+	  $('#fromEmail').attr("value", fromEmail);
+	  $('#toEmail').attr("value", toEmail);
+	  $('#message').attr("value", bodyMessage);
+	  $('#contactform').removeClass('gone');
+	  */
+  }
+  
+  function getNoUserEmailMessage() {
+	  return "<span class='skipBonus' onclick='loginClicked(); finalizeMove();'>Sign in</span> to play games with others online. <br />";
+  }
+  
+  function playingOnlineGame() {
+	  return onlinePlayEnabled && gameId > 0;
+  }
   
 function linkShortenCallback(shortUrl, ignoreNoEmail, okToUpdateWinInfo) {
 	var aiList = gameController.getAiList();
@@ -1255,9 +1237,9 @@ function linkShortenCallback(shortUrl, ignoreNoEmail, okToUpdateWinInfo) {
 		messageText += activeAi.getMessage();
 	}
 
-	if (getGameWinner()) {
+	if (gameController.theGame.getWinner()) {
 		// There is a winner!
-		messageText += "<br /><strong>" + getGameWinner() + getGameWinReason() + "</strong>";
+		messageText += "<br /><strong>" + gameController.theGame.getWinner() + gameController.theGame.getWinReason() + "</strong>";
 		// Save winner
 		if (okToUpdateWinInfo && playingOnlineGame()) {
 			var winnerUsername;
@@ -1267,10 +1249,10 @@ function linkShortenCallback(shortUrl, ignoreNoEmail, okToUpdateWinInfo) {
 				Draw: 0.5
 			*/
 			var hostResultCode = 0.5;
-			if (getGameWinner() === HOST) {
+			if (gameController.theGame.getWinner() === HOST) {
 				winnerUsername = currentGameData.hostUsername;
 				hostResultCode = 1;
-			} else if (getGameWinner() === GUEST) {
+			} else if (gameController.theGame.getWinner() === GUEST) {
 				winnerUsername = currentGameData.guestUsername;
 				hostResultCode = 0;
 			}
@@ -1379,11 +1361,9 @@ function showResetMoveMessage() {
 }
 
 function resetMove() {
-	var rerunHandledByController = gameController.resetMove();
+	gameController.resetMove();
 
-	if (!rerunHandledByController) {
-		rerunAll();
-	}
+	rerunAll();
 	hideConfirmMoveButton();
 	// $('#contactform').addClass('gone');
 }
@@ -1851,12 +1831,12 @@ function callSubmitMove(moveAnimationBeginStep, moveIsConfirmed) {
 		GameClock.stopGameClock();
 		if (!GameClock.currentClockIsOutOfTime()) {
 			onlinePlayEngine.submitMove(gameId, encodeURIComponent(gameController.gameNotation.notationTextForUrl()), getLoginToken(), getGameTypeEntryFromId(currentGameData.gameTypeId).desc, submitMoveCallback,
-				GameClock.getCurrentGameClockJsonString(), currentGameData.resultId);
+				GameClock.getCurrentGameClockJsonString());
 		}
 	} else {
 		/* Move needs to be confirmed. Finalize move and show confirm button. */
 		finalizeMove(submitMoveData.moveAnimationBeginStep);
-		if (gameController.automaticallySubmitMoveRequired && gameController.automaticallySubmitMoveRequired()) {
+		if (gameController.undoMoveAllowed && !gameController.undoMoveAllowed()) {
 			callSubmitMove(moveAnimationBeginStep, true);
 		} else {
 			showConfirmMoveButton();
@@ -1995,35 +1975,35 @@ function userIsLoggedIn() {
 		getDeviceId();
 }
   
-function forgetCurrentGameInfo() {
-	clearAiPlayers();
-
-	if (gameWatchIntervalValue) {
-		clearInterval(gameWatchIntervalValue);
-		gameWatchIntervalValue = null;
-	}
-
-	gameId = -1;
-	lastKnownGameNotation = null;
-	if (gameWatchIntervalValue) {
-		clearInterval(gameWatchIntervalValue);
-		gameWatchIntervalValue = null;
-	}
-	currentGameOpponentUsername = null;
-	currentGameData = new Object();
-	currentMoveIndex = 0;
-	pauseRun();
-
-	// Change user to host
-	hostEmail = getUserEmail();
-	guestEmail = null;
-
-	updateFooter();
-
-	document.getElementById('chatMessagesDisplay').innerHTML = "";
-
-	updateCurrentGameTitle();
-}
+  function forgetCurrentGameInfo() {
+	  clearAiPlayers();
+  
+	  if (gameWatchIntervalValue) {
+		  clearInterval(gameWatchIntervalValue);
+		  gameWatchIntervalValue = null;
+	  }
+  
+	  gameId = -1;
+	  lastKnownGameNotation = null;
+	  if (gameWatchIntervalValue) {
+		  clearInterval(gameWatchIntervalValue);
+		  gameWatchIntervalValue = null;
+	  }
+	  currentGameOpponentUsername = null;
+	  currentGameData = new Object();
+	  currentMoveIndex = 0;
+	  pauseRun();
+  
+	  // Change user to host
+	  hostEmail = getUserEmail();
+	  guestEmail = null;
+  
+	  updateFooter();
+  
+	  document.getElementById('chatMessagesDisplay').innerHTML = "";
+  
+	  updateCurrentGameTitle();
+  }
   
 var GameType = {
 	SkudPaiSho: {
@@ -2114,9 +2094,7 @@ var GameType = {
 		gameOptions: [
 			NO_HARMONY_VISUAL_AIDS,
 			OPTION_DOUBLE_ACCENT_TILES,
-			HIDE_RESERVE_TILES,
-			MIDLINE_OPENER,
-			ETHEREAL_ACCENT_TILES
+			HIDE_RESERVE_TILES
 		],
 		noRankedGames: true	// Can take out when testing done, game ready to enable ranked games
 	},
@@ -2359,7 +2337,6 @@ var jumpToGameCallback = function jumpToGameCallback(results) {
 		currentGameData.isRankedGame = myGame.rankedGame;
 		currentGameData.hostRating = myGame.hostRating;
 		currentGameData.guestRating = myGame.guestRating;
-		currentGameData.resultId = myGame.resultId;
 		currentGameData.gameClock = myGame.gameClock;
 		GameClock.loadGameClock(currentGameData.gameClock);
 
@@ -2390,16 +2367,15 @@ function shouldSendJamboreeNoteChat(gameTypeId) {
 	return gameTypeId === GameType.Adevar.id;
 }
   
-function jumpToGame(gameIdChosen) {
-	if (!onlinePlayEnabled) {
-		return;
-	}
-	clearGameWatchInterval();
-	forgetCurrentGameInfo();
-	if (!onlinePlayPaused) {
+  function jumpToGame(gameIdChosen) {
+	  if (!onlinePlayEnabled) {
+		  return;
+	  }
+	  clearGameWatchInterval();
+	  if (!onlinePlayPaused) {
 		onlinePlayEngine.getGameInfo(getUserId(), gameIdChosen, jumpToGameCallback);
-	}
-}
+	  }
+  }
   
 function populateMyGamesList(results) {
 	var resultRows = results.split('\n');
@@ -3399,7 +3375,7 @@ var processChatCommands = function(chatMessage) {
 
 function quitInactiveOnlineGame() {
 	if (iAmPlayerInCurrentOnlineGame()
-		&& !getGameWinner()
+		&& !gameController.theGame.getWinner()
 		&& (currentGameData.hostUsername === currentGameData.guestUsername
 			|| (!myTurn() && onlineGameIsOldEnoughToBeQuit()))
 	) {
@@ -3410,27 +3386,26 @@ function quitInactiveOnlineGame() {
 function quitOnlineGameClicked() {
 	var message = "";
 	if (playingOnlineGame() && iAmPlayerInCurrentOnlineGame()
-		&& !getGameWinner()
+		&& !gameController.theGame.getWinner()
 		&& (currentGameData.hostUsername === currentGameData.guestUsername
 			|| (!myTurn() && onlineGameIsOldEnoughToBeQuit()))
 	) {
-		message = "<div>Are you sure you want to quit and end this inactive game? The game will appear as Inactive in your Completed Games list, but will become active again when your opponent plays.</div>";
-		message += "<br /><div class='clickableText' onclick='closeModal(); quitInactiveOnlineGame();'>Yes - mark current game inactive</div>";
+		message = "<div>Are you sure you want to quit and end this inactive game? The game will end and will appear as Inactive in your Completed Games list.</div>";
+		message += "<br /><div class='clickableText' onclick='closeModal(); quitInactiveOnlineGame();'>Yes - quit current game</div>";
 		message += "<br /><div class='clickableText' onclick='closeModal();'>No - cancel</div>";
 	} else {
-		message = "When playing an unfinished inactive online game, this is where you can mark the game inactive to hide it from your My Games list.";
+		message = "When playing an unfinished inactive online game, this is where you can quit or leave a game if you wish to do so.";
 	}
 
 	showModal("Quit Current Online Game", message);
 }
 
 function onlineGameIsOldEnoughToBeQuit() {
-	return true;
-	/* var currentGameTimestampDate = buildDateFromTimestamp(currentGameData.lastUpdatedTimestamp);
+	var currentGameTimestampDate = buildDateFromTimestamp(currentGameData.lastUpdatedTimestamp);
 	var nowDate = new Date();
 	var difference = nowDate.getTime() - currentGameTimestampDate.getTime();
 	var daysDifference = difference / 1000 / 60 / 60 / 24;
-	return daysDifference >= 3 || usernameEquals('Zach'); */
+	return daysDifference >= 3 || usernameEquals('Zach');
 }
 
 function buildDateFromTimestamp(timestampStr) {
@@ -3518,76 +3493,68 @@ function continueTutorial() {
 	tutorialInProgress = false;
 }
   
-function iOSShake() {
-	// If undo move is allowed, ask user if they wanna
-	if ((playingOnlineGame() && !myTurn() && !getGameWinner())
-		|| (!playingOnlineGame())) {
-		var message = "<br /><div class='clickableText' onclick='resetMove(); closeModal();'>Yes, undo move</div>";
-		message += "<br /><div class='clickableText' onclick='closeModal();'>Cancel</div>";
-
-		showModal("Undo move?", message);
-	}
-}
-
-function saveDeviceTokenIfNeeded() {
-	var deviceToken = localStorage.getItem(deviceTokenKey);
-	if ((ios || QueryString.appType === 'ios') && deviceToken && userIsLoggedIn()) {
-		onlinePlayEngine.addUserPreferenceValue(getLoginToken(), 3, deviceToken, emptyCallback);
-	}
-}
+  function iOSShake() {
+	  // If undo move is allowed, ask user if they wanna
+	  if ((playingOnlineGame() && !myTurn() && !gameController.theGame.getWinner())
+		  || (!playingOnlineGame())) {
+		  var message = "<br /><div class='clickableText' onclick='resetMove(); closeModal();'>Yes, undo move</div>";
+		  message += "<br /><div class='clickableText' onclick='closeModal();'>Cancel</div>";
   
-function setDeviceToken(deviceToken) {
-	localStorage.setItem(deviceTokenKey, deviceToken);
-	saveDeviceTokenIfNeeded();
-}
-
-function openShop() {
-	openLink("https://skudpaisho.com/site/buying-pai-sho/");
-}
-
-/* Options */
-var ggOptions = [];
-
-function addOption(option) {
-	ggOptions.push(option);
-}
-
-function clearOptions() {
-	ggOptions = [];
-}
-
-function addOptionFromInput() {
-	addGameOption(document.getElementById('optionAddInput').value);
-	closeModal();
-}
+		  showModal("Undo move?", message);
+	  }
+  }
   
-function promptAddOption() {
-	var message = "";
-	// if (usernameIsOneOf(['SkudPaiSho'])) {
-	// 	message = "<br /><input type='text' id='optionAddInput' name='optionAddInput' />";
-	// 	message += "<br /><div class='clickableText' onclick='addOptionFromInput()'>Add</div>";
-
-	// 	if (ggOptions.length > 0) {
-	// 		message += "<br />";
-	// 		for (var i = 0; i < ggOptions.length; i++) {
-	// 			message += "<div>";
-	// 			message += ggOptions[i];
-	// 			message += "</div>";
-	// 		}
-	// 		message += "<br /><div class='clickableText' onclick='clearOptions()'>Clear Options</div>";
-	// 	}
-
-	// 	showModal("Secrets", message);
-	// } else 
-	if (usernameIsOneOf(['SkudPaiSho','Adevar'])) {
-		message = "Enter list of names:";
-		message += "<br /><textarea rows = '11' cols = '40' name = 'description' id='giveawayNamesTextbox'></textarea>";
-		message += "<br /><div class='clickableText' onclick='Giveaway.doIt()'>Choose name</div>";
-		message += "<br /><div id='giveawayResults'>:)</div>";
-
-		showModal("Giveaway Winner Chooser!", message);
-	}
-}
+  function saveDeviceTokenIfNeeded() {
+	  var deviceToken = localStorage.getItem(deviceTokenKey);
+	  if ((ios || QueryString.appType === 'ios') && deviceToken && userIsLoggedIn()) {
+		  onlinePlayEngine.addUserPreferenceValue(getLoginToken(), 3, deviceToken, emptyCallback);
+	  }
+  }
+  
+  function setDeviceToken(deviceToken) {
+	  localStorage.setItem(deviceTokenKey, deviceToken);
+	  saveDeviceTokenIfNeeded();
+  }
+  
+  function openShop() {
+	  openLink("https://skudpaisho.com/site/buying-pai-sho/");
+  }
+  
+  /* Options */
+  var ggOptions = [];
+  
+  function addOption(option) {
+	  ggOptions.push(option);
+  }
+  
+  function clearOptions() {
+	  ggOptions = [];
+  }
+  
+  function addOptionFromInput() {
+	  addGameOption(document.getElementById('optionAddInput').value);
+	  closeModal();
+  }
+  
+  function promptAddOption() {
+	  var message = "";
+	  if (usernameIsOneOf(['SkudPaiSho'])) {
+		  message = "<br /><input type='text' id='optionAddInput' name='optionAddInput' />";
+		  message += "<br /><div class='clickableText' onclick='addOptionFromInput()'>Add</div>";
+  
+		  if (ggOptions.length > 0) {
+			  message += "<br />";
+			  for (var i = 0; i < ggOptions.length; i++) {
+				  message += "<div>";
+				  message += ggOptions[i];
+				  message += "</div>";
+			  }
+			  message += "<br /><div class='clickableText' onclick='clearOptions()'>Clear Options</div>";
+		  }
+  
+		  showModal("Secrets", message);
+	  }
+  }
   
   function addGameOption(option) {
 	  addOption(option);
@@ -4362,6 +4329,56 @@ function show2020GameStats(showWins) {
 		}
 	);
 }
+function getColorForGame(name) {
+    if (name.includes("Skud")) {
+        return("#c83737");
+    } else if (name.includes("Vagabond")) {
+        return("#88bd38");
+    } else if (name.includes("Adevăr")) {
+        return("#6d60b5");
+    } else if (name.includes("Capture")) {
+        return("#6cb562");
+    } else if (name.includes("Solitaire")) {
+        return("#50ac8c");
+    } else if (name.includes("Street")) {
+        return("#464444");
+    } else if (name.includes("Overgrowth")) {
+        return("#b4bb31");
+    } else if (name.includes("Fire")) {
+        return("#d47831");
+    } else if (name.includes("Playground")) {
+        return("#e0b92a");
+    } else if (name.includes("Tumbleweed")) {
+		return("#da992e");
+	} else {
+        return("#f1f1f1");
+    }
+}
+function getSecondaryColorForGame(name) {
+    if (name.includes("Skud")) {
+        return("#982929");
+    } else if (name.includes("Vagabond")) {
+        return("#6d9f22");
+    } else if (name.includes("Adevăr")) {
+        return("#4d4095");
+    } else if (name.includes("Capture")) {
+        return("#418837");
+    } else if (name.includes("Solitaire")) {
+        return("#369272");
+    } else if (name.includes("Street")) {
+        return("#343131");
+    } else if (name.includes("Overgrowth")) {
+        return("#9da41b");
+    } else if (name.includes("Fire")) {
+        return("#ab5819");
+    } else if (name.includes("Playground")) {
+        return("#b69313");
+    } else if (name.includes("Tumbleweed")) {
+		return("#B97D1C");
+	} else {
+        return("#f1f1f1");
+    }
+}
 
 function showGameStats(showWins) {
 	onlinePlayEngine.getCompletedGameStats(
@@ -4382,16 +4399,35 @@ function showGameStats(showWins) {
 					var message = getUsername() + "'s total completed games against other players:<br />";
 
 					var stats = resultData.stats;
+					var conicGradientValues = "";
+					var offset = 0;
+					var totalGamesCompleted = 0;
+
+					for (var i = 0; i < stats.length; i++) {
+						totalGamesCompleted += stats[i].totalGamesCompleted;
+					}
 
 					for (var i = 0; i < stats.length; i++) {
 						var totalWins = stats[i].totalWins ? stats[i].totalWins : 0;
 						var winPercent = Math.round(totalWins / stats[i].totalGamesCompleted * 100);
+						var angleOfSection = Math.round(360*(stats[i].totalGamesCompleted/totalGamesCompleted));
 						if (showWins) {
-							message += "<br />" + stats[i].gameType + ": " + stats[i].totalGamesCompleted + " (" + totalWins + " wins, " + winPercent + "%)";
+							message += "<br /> <span style='color:" + getColorForGame(gameMode) + ";'>" + stats[i].gameType + "</span> : " + stats[i].totalGamesCompleted + " (" + totalWins + " wins, " + winPercent + "%)";
+
+							var angleOfWinSection = angleOfSection * (stats[i].totalWins / stats[i].totalGamesCompleted);
+							var angleOfLossSection = angleOfSection - angleOfWinSection;
+							conicGradientValues += getColorForGame(stats[i].gameType) + " " + ((offset > 0 && i < stats.length-1)?(offset + "deg "):" ") + (offset + angleOfLosSection) + "deg,";
+							offset += angleOfLossSection;
+							conicGradientValues += getSecondaryColorForGame(stats[i].gameType) + " " + ((offset > 0 && i < stats.length-1)?(offset+"deg "):" ") + (offset + angleOfWinSection) + "deg" + ((i < values.length-1)?",":"");
+							offset += angleOfWinSection;
 						} else {
-							message += "<br />" + stats[i].gameType + ": " + stats[i].totalGamesCompleted;
+							message += "<br /> <span style='color:" + getColorForGame(gameMode) + ";'>" + stats[i].gameType + "</span> : " + stats[i].totalGamesCompleted;
+							conicGradientValues += getColorForGame(stats[i].gameType) + " " + ((offset > 0 && i < stats.length-1)?(offset+"deg "):" ") + (offset + angleOfSection) + "deg" + ((i < values.length-1)?",":"");
+							offset += angleOfSection;
 						}
 					}
+
+					message += "<div class='pieChart' style='background:conic-gradient(" + conicGradientValues + ");'></div>"
 
 					if (!showWins) {
 						message += "<br /><br /><span class='skipBonus' onclick='showGameStats(true);'>Show number of wins for each game</span>";

@@ -170,7 +170,7 @@ FirePaiShoActuator.prototype.addTile = function(tile, mainContainer, clickable) 
 
 	if (tile.selectedFromPile) {
 		theDiv.classList.add("selectedFromPile");
-		theDiv.classList.add("drained");
+		theDiv.classList.add("boosted");
 	}
 
 	var theImg = document.createElement("img");
@@ -242,23 +242,12 @@ FirePaiShoActuator.prototype.addBoardPoint = function(boardPoint, moveToAnimate,
 					});
 				}, pieceAnimationLength * (2 - moveAnimationBeginStep));
 			} else {
-				var tileInMiddle = (gameOptionEnabled(ETHEREAL_ACCENT_TILES) && boardPoint.hasTile());
-				if (!tileInMiddle) {
-					theDiv.classList.add("betweenHarmony");
-				}
+				theDiv.classList.add("betweenHarmony");
 				if (boardPoint.betweenHarmonyHost) {
-					if (!tileInMiddle) {
-						theDiv.classList.add("bhHost");
-					} else {
-						theDiv.classList.add("tileBetweenHarmonyHOST")
-					}
+					theDiv.classList.add("bhHost");
 				}
 				if (boardPoint.betweenHarmonyGuest) {
-					if (!tileInMiddle) {
-						theDiv.classList.add("bhGuest");
-					} else {
-						theDiv.classList.add("tileBetweenHarmonyGUEST")
-					}
+					theDiv.classList.add("bhGuest");
 				}
 			}
 		}
